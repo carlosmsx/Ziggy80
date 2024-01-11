@@ -12,7 +12,8 @@ Estas restricciones buscan simplificar el diseño del hardware y software para e
 ## Desafíos de Implementación
 Uno de los desafíos clave fue la limitación de GPIOs. Se requerían al menos 29 líneas, pero la Raspberry Pi Pico solo dispone de 28 GPIOs utilizables. Se hicieron ajustes para adaptar el diseño a 16 GPIOs, optimizando la disposición y el manejo de estas líneas desde los PIOs y sus máquinas de estado.
 
-El esquema de bloques se configura de la siguiente manera:
+Diagrama de bloques:
+![Diagrama de bloques](/diagrama_de_bloques.svg)
 
 La Raspberry Pi Pico funciona a 3.3V, lo que demandó el uso de adaptadores de niveles de tensión. Este diseño también ayudó a minimizar la cantidad de adaptadores a solo 2.
 
@@ -25,9 +26,15 @@ Para emular un Z80 se requirieron diversas partes:
 
 Accesos a memoria
 
+![Diagrama de bloques](/memory_cycle_primary_slot.png)
+
 Acceso a puertos I/O
 
+![Diagrama de bloques](/IO_cycle_primary_slot.png)
+
 De acuerdo a estos esquemas he diseñado el siguiente diagrama de flujos que tiene la particularidad de estar segmentado según el T-state donde debe ejecutarse cada parte:
+
+![Diagrama de bloques](/IO_flow_chart.svg)
 
 ## Funcionamiento
 Para el funcionamiento se definen 4 operaciones que deben estar presentes:
