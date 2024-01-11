@@ -6,10 +6,12 @@ Inicialmente desarrollado para computadoras MSX, específicamente para las compu
 * Actualmente, no implementa señales como RFSH, M1, RESET, BUSRQ, WAIT, BUSAK, HALT, NMI e INT. Se contempla la posibilidad de incorporarlas en futuras versiones. La señal WAIT en sistemas MSX se utiliza para agregar un T-state. Al estar implementada en el software podría generar incompatibilidades con hardware que realmente utilice esta línea, incluso en dispositivos MSX compatibles.
 * El diseño está ajustado para replicar las señales de un procesador operando a 3.579 MHz, por lo que debe modificarse para funcionar a otras velocidades.
 * Las líneas NMI e INT tampoco se tienen en cuenta actualmente. Para la interrupción generada por el VDP en MSX, se simula por software utilizando un timer interno del RP2040..
+
 Estas restricciones buscan simplificar el diseño del hardware y software para emular únicamente el comportamiento esencial del Z80. Sin embargo, se considera la posibilidad de mejorar el proyecto en el futuro incorporando más características del Z80 original.
 
 ## Desafíos de Implementación
 Uno de los desafíos clave fue la limitación de GPIOs. Se requerían al menos 29 líneas, pero la Raspberry Pi Pico solo dispone de 28 GPIOs utilizables. Se hicieron ajustes para adaptar el diseño a 16 GPIOs, optimizando la disposición y el manejo de estas líneas desde los PIOs y sus máquinas de estado.
+
 El esquema de bloques se configura de la siguiente manera:
 
 La Raspberry Pi Pico funciona a 3.3V, lo que demandó el uso de adaptadores de niveles de tensión. Este diseño también ayudó a minimizar la cantidad de adaptadores a solo 2.
@@ -54,7 +56,8 @@ Entonces, la primer máquina se encarga de lo siguiente:
 * Durante T3 en bajo
   * Envía el dato leído y termina la ejecución. Por fuera, el código que lanza la ejecución de esta máquina espera que la misma retorne este dato para continuar. Si el dato devuelto es de una operación de escritura, simplemente se descarta.
 
-La segunda máquina en forma resumida se encarga como ya mencioné anteriormente de la ejecución sincronizada de las señales IORQ, MREQ, RD y WR. También se encarga de la habilitación o deshabilitación en el momento indicado del 74LS245 usado para los datos.
+La segunda máquina se encarga como ya se mencionó anteriormente de la ejecución sincronizada de las señales IORQ, MREQ, RD y WR. También se encarga de la habilitación o deshabilitación en el momento indicado del 74LS245 usado para los datos.
+
 Al principio de la ejecución, espera que se dispare una interrupción interna desde la máquina principal y a partir de esto empieza a generar las señales. Al llegar a T3 se lo indica a la primera máquina mediante otra interrupción, luego espera la finalización de T3 y termina. Tanto para operaciones de memoria como para I/O se ha insertado un wait state sin importar el caso para simplificar el código. Esto solo afecta en que toma un ciclo más de reloj aunque no sea necesario. 
 
 En resumen, esta arquitectura de dos máquinas de estado interconectadas permite ejecutar de manera precisa y coordinada las operaciones esenciales, ofreciendo un control detallado sobre las señales y tiempos involucrados en el proceso.
@@ -65,6 +68,7 @@ El proyecto Ziggy80 ha alcanzado un nivel de funcionalidad bien sincronizada que
 Pienso que lo más interesante de este proyecto es la diversidad de oportunidades que se despliegan. Desde herramientas de diagnóstico hasta la posibilidad de transformar la MSX en una consola moderna, Ziggy80 ofrece un lienzo para la innovación. La capacidad de ejecutar el Z80 a velocidades superiores, redirigir accesos a memoria y puertos I/O, característica que permite mejorar el hardware e incluso usar técnicas de sistemas operativos más avanzados, y la perspectiva teórica de tomar "instantáneas" del sistema antes de apagarlo, son solo algunas de las funciones que destacan la versatilidad del proyecto.
 
 Además, la iniciativa de desarrollar ejemplos prácticos para demostrar estas capacidades añadirá valor y facilitará la adopción del proyecto por parte de la comunidad.
+
 En este punto, quisiera extender una cálida invitación a otros apasionados por la tecnología a unirse a este objetivo. Con el potencial de colaboradores adicionales, podemos llevar Ziggy80 a nuevas alturas. Cada contribución, ya sea en forma de ideas innovadoras o mejoras prácticas, puede marcar la diferencia.
 
 No olvidemos que también existe una versión de Raspberry PI Pico con capacidades de WIFI y Bluetooth, abriendo un abanico de posibilidades aún más amplio.
