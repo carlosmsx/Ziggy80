@@ -10,7 +10,7 @@ Inicialmente desarrollado para computadoras MSX, específicamente para las compu
 Estas restricciones buscan simplificar el diseño del hardware y software para emular únicamente el comportamiento esencial del Z80. Sin embargo, se considera la posibilidad de mejorar el proyecto en el futuro incorporando más características del Z80 original.
 
 ## Desafíos de Implementación
-Uno de los desafíos clave fue la limitación de GPIOs. Se requerían al menos 29 líneas, pero la Raspberry Pi Pico solo dispone de 28 GPIOs utilizables. Se hicieron ajustes para adaptar el diseño a 16 GPIOs, optimizando la disposición y el manejo de estas líneas desde los PIOs y sus máquinas de estado.
+Uno de los desafíos clave fue la limitación de GPIOs. Se requerían al menos 29 líneas, pero la Raspberry Pi Pico solo dispone de 26 GPIOs utilizables. Se hicieron ajustes para adaptar el diseño a 16 GPIOs, optimizando la disposición y el manejo de estas líneas desde los PIOs y sus máquinas de estado.
 
 Diagrama de bloques:
 ![Diagrama de bloques](/diagrama_de_bloques.svg)
