@@ -76,7 +76,7 @@ Pienso que lo más interesante de este proyecto es la diversidad de oportunidade
 
 Además, la iniciativa de desarrollar ejemplos prácticos para demostrar estas capacidades añadirá valor y facilitará la adopción del proyecto por parte de la comunidad.
 
-En este punto, quisiera extender una cálida invitación a otros apasionados por la tecnología a unirse a este objetivo. Con el potencial de colaboradores adicionales, podemos llevar Ziggy80 a nuevas alturas. Cada contribución, ya sea en forma de ideas innovadoras o mejoras prácticas, puede marcar la diferencia.
+En este punto, quisiera extender una cálida invitación a otros apasionados por la tecnología a unirse a este objetivo. Con el potencial de colaboradores adicionales, podemos llevar Ziggy80 a nuevos niveles. Cada contribución, ya sea en forma de ideas innovadoras o mejoras prácticas, puede marcar la diferencia.
 
 No olvidemos que también existe una versión de Raspberry PI Pico con capacidades de WIFI y Bluetooth, abriendo un abanico de posibilidades aún más amplio.
 
