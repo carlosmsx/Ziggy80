@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "pico/cyw43_arch.h"
 #include "msx.h"
 #include "marat/Z80.h"
 #include "z80pico.h"
@@ -24,18 +25,26 @@ bool vdp_int_callback(struct repeating_timer *t)
 
 int main() 
 {
-    // const uint LED_PIN = PICO_DEFAULT_LED_PIN;
-    // gpio_init(LED_PIN);
-    // gpio_set_dir(LED_PIN, GPIO_OUT);
+    // stdio_init_all();
+    if (cyw43_arch_init()) {
+        printf("Wi-Fi init failed");
+        return -1;
+    }
 
-    sleep_ms(500);
     InitRAM();
     SetupPIO();
-    // gpio_put(LED_PIN, 1);
-   
+  
     InitPPI();
-    Ti99Splash();
-    sleep_ms(2000);
+    sleep_ms(200);
+    // Ti99Splash();
+    // Test_PSG_1();
+    // sleep_ms(1000);
+    // while (true) {
+    //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+    //     sleep_ms(250);
+    //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+    //     sleep_ms(250);
+    // }
   
     //Reset the CPU to 0x00 and zero the regs/flags
     ResetZ80(&cpu);
