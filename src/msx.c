@@ -10,6 +10,7 @@
 #include "z80pico.h"
 #include "msx.h"
 #include "marat/Z80.h"
+#include "pico/cyw43_arch.h"
 
 //Memoria ram
 uint8_t *RAM;
@@ -24,9 +25,16 @@ uint8_t InZ80(register uint16_t port)
 
 void OutZ80(register uint16_t port, register uint8_t data)
 {
-    if ((port & 0xff) == 0xa8) 
-        PPI_A8 = data;
-    PIO_OutZ80(port, data);
+    if (port==0)
+    {
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, data);
+    }
+    else
+    {
+        if ((port & 0xff) == 0xa8) 
+            PPI_A8 = data;
+        PIO_OutZ80(port, data);
+    }
 }
 
 // Memory read -- read the value at memory location 'address'

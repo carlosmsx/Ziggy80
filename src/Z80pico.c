@@ -1,3 +1,9 @@
+/*********************************************
+ * Autor: Carlos Escobar
+ * Jul-2023
+ * Ref:
+ *********************************************/
+
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/uart.h"
@@ -7,6 +13,9 @@ uint sm_z80pico;
 uint offset_z80pico;
 uint sm_z80sequencer;
 uint offset_z80sequencer;
+
+uint sm_test;
+uint offset_test;
 
 //                        +------ OE
 //                        |+----- RD
@@ -92,6 +101,12 @@ uint8_t PIO_RdZ80(register uint16_t address)
     return b;
 }
 
+void PIO_Test(register uint16_t port, register uint8_t data)
+{
+    uint32_t z = (data << 16) | port;
+    pio_sm_put(pio0, sm_test, z);
+}
+
 void SetupPIO() {
     sm_z80pico = pio_claim_unused_sm(pio0, true);
     offset_z80pico = pio_add_program(pio0, &z80pico_program);
@@ -100,4 +115,10 @@ void SetupPIO() {
     sm_z80sequencer = pio_claim_unused_sm(pio0, true);
     offset_z80sequencer = pio_add_program(pio0, &z80sequencer_program);
     z80sequencer_program_init(pio0, sm_z80sequencer, offset_z80sequencer, 12);
+}
+
+void SetupPIOTest() {
+    sm_test = pio_claim_unused_sm(pio0, true);
+    offset_test = pio_add_program(pio0, &test_program);
+    test_program_init(pio0, sm_test, offset_test, 2);
 }

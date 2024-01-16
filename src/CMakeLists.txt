@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
+set(PICO_BOARD pico_w)
 
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
-
 include(pico_extras_import_optional.cmake)
 
-project(MSXHwTest C CXX ASM)
+project(Ziggy80 C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -32,14 +32,28 @@ cmake_minimum_required(VERSION 3.15)
 # Establecer la política CMP0115
 cmake_policy(SET CMP0115 NEW)
 
-add_executable(z80pico_pio)
-pico_generate_pio_header(z80pico_pio ${CMAKE_CURRENT_LIST_DIR}/z80pico.pio)
+add_executable(Ziggy80)
+pico_generate_pio_header(Ziggy80 ${CMAKE_CURRENT_LIST_DIR}/z80pico.pio)
 
-target_sources(z80pico_pio PRIVATE z80pico.c msx.c main.c marat/Z80.c)
+target_sources(Ziggy80 PRIVATE z80pico.c msx.c main.c marat/Z80.c)
 
-target_link_libraries(z80pico_pio PRIVATE
+target_link_libraries(Ziggy80 PRIVATE
         pico_stdlib
         hardware_pio
+        pico_cyw43_arch_none
         )
 
-pico_add_extra_outputs(z80pico_pio)
+pico_add_extra_outputs(Ziggy80)
+
+add_executable(Test)
+pico_generate_pio_header(Test ${CMAKE_CURRENT_LIST_DIR}/z80pico.pio)
+
+target_sources(Test PRIVATE z80pico.c msx.c test.c marat/Z80.c)
+
+target_link_libraries(Test PRIVATE
+        pico_stdlib
+        hardware_pio
+        pico_cyw43_arch_none
+        )
+
+pico_add_extra_outputs(Test)

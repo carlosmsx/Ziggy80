@@ -1,3 +1,9 @@
+;/*********************************************
+; * Autor: Carlos Escobar
+; * Jul-2023
+; * Ref:
+; *********************************************/
+
 .program z80pico
 .side_set 2
 
@@ -21,24 +27,23 @@ inicio:
 		wait CLK1 gpio CPUCLK	side NONE	; sincronizo T1
 		irq set 0				side NONE	; disparo secuencia
 T1:
-; ESTE CODIGO COMENTADO FUNCIONA CON 74LS573
-		; out pins,8          	side ADDR_L  [1] ; LE durante 2 ciclos
-		; nop						side NONE	 [1] ; termino LE y espero un ciclo mas
-		; out pins,8          	side ADDR_H  [1] ; LE durante 2 ciclos
-		; wait CLK0 gpio CPUCLK	side NONE	 [1]; termino LE y espero T1'
-; CODIGO A CONTINUACION FUNCIONA CON 74LS574
-		out pins,8          	side NONE   ; presento addr_low  
-		nop						side ADDR_L	; CLK 
-		out pins,8          	side NONE   ; presento addr_high
-		wait CLK0 gpio CPUCLK	side ADDR_H	; CLK 
+; CODIGO CON 74LS573
+		out pins,8          	side ADDR_L  [2] ; LE durante 2 ciclos
+		nop						side NONE	 [1] ; termino LE y espero un ciclo mas
+		out pins,8          	side ADDR_H  [2] ; LE durante 2 ciclos
+		wait CLK0 gpio CPUCLK	side NONE	 [1] ; termino LE y espero T1'
+; CODIGO CON 74LS574
+		; out pins,8          	side NONE   ; presento addr_low  
+		; nop						side ADDR_L	; CLK 
+		; out pins,8          	side NONE   ; presento addr_high
+		; wait CLK0 gpio CPUCLK	side ADDR_H	; CLK 
 T1_:
 		out	pins,8				side NONE	; data
 		out pindirs 8			side NONE	; set data bus as input/output
 
 		wait 1 irq 1			side NONE	; waits ending of sequence
 T3:
-		in pins,8				side NONE	; TODO: is it possible to set threshold for input in order to avoid PUSH?
-		in null,24				side NONE
+		in pins,32				side NONE	; TODO: is it possible to set threshold for input in order to avoid PUSH?
 		wait CLK0 gpio CPUCLK	side NONE	; espero T3'
 T3_:
 		push					side NONE
@@ -88,8 +93,8 @@ static inline void z80pico_program_init(PIO pio, uint sm, uint offset, uint pin)
 		wait CLK0 gpio CPUCLK		;[SHIFT]	; espero T1'
 		out	pins,5					[15]
 		out	pins,5					[15]
-		out	pins,5					[31]
-		nop							[16]
+		out	pins,5					[15]
+		nop							[31] ; wait state
 		out	pins,5					     ; doy un tiempo antes de hacer el IN en sm0
 		irq set 1					[16]
 		out pins,5					[16]
@@ -120,3 +125,59 @@ static inline void z80sequencer_program_init(PIO pio, uint sm, uint offset, uint
 
 %}
 
+.program test
+.side_set 2 opt
+
+;Side set consts
+.define NONE 0
+.define ADDR_L 1
+.define ADDR_H 2
+
+; MSX clock gpio
+.define CPUCLK 17
+
+.wrap_target
+inicio:
+        pull block				
+T1:
+		set pins,0
+		; out pins,8          	
+		; nop						side ADDR_L	; CLK 
+		; out pins,8          	side NONE   ; presento addr_high
+		; nop						side ADDR_H	; CLK 
+		out pins,8          	side ADDR_L [1]
+		nop						side NONE	[1]; CLK 
+		out pins,8          	side ADDR_H [1]   ; presento addr_high
+		nop						side NONE	[1]; CLK 
+T1_:
+		out	pins,8				side NONE	; data
+
+.wrap
+
+% c-sdk {
+
+#include "hardware/clocks.h"
+
+static inline void test_program_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_sm_config config = test_program_get_default_config(offset);
+
+    sm_config_set_out_pins(&config, pin, 8);		// base + count
+    sm_config_set_sideset_pins(&config, pin+8);		// side-set
+	sm_config_set_set_pins(&config, pin+8+2, 5);
+    // Set the pin direction to output at the PIO
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 8, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin+8, 2, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin+8+2, 5, true);
+    
+	// Set this pin's GPIO function (connect PIO to the pad)
+    for (int i=0; i<10; i++) pio_gpio_init(pio, pin+i);
+    for (int i=0; i<5; i++) pio_gpio_init(pio, pin+8+2+i);
+
+    // Load our configuration, and jump to the start of the program
+    pio_sm_init(pio, sm, offset, &config);
+
+    // Set the state machine running
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+%}
