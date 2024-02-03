@@ -5,7 +5,7 @@ Inicialmente desarrollado para computadoras MSX, específicamente para las compu
 
 * Actualmente, no implementa señales como RFSH, M1, RESET, BUSRQ, WAIT, BUSAK, HALT, NMI e INT. Se contempla la posibilidad de incorporarlas en futuras versiones. La señal WAIT en sistemas MSX se utiliza para agregar un T-state. Al estar implementada en el software podría generar incompatibilidades con hardware que realmente utilice esta línea, incluso en dispositivos MSX compatibles.
 * El diseño está ajustado para replicar las señales de un procesador operando a 3.579 MHz, por lo que debe modificarse para funcionar a otras velocidades.
-* Al no estar implementadas,las líneas NMI e INT tampoco se tienen en cuenta actualmente. Por este motivo, la interrupción generada por el VDP en MSX, se simula por software utilizando un timer interno del RP2040..
+* Al no estar implementada la linea INT, la interrupción generada por el VDP en MSX se simula por software utilizando un timer interno del RP2040..
 
 Estas restricciones buscan simplificar el diseño del hardware y software para emular únicamente el comportamiento esencial del Z80. Sin embargo, se considera la posibilidad de mejorar el proyecto en el futuro incorporando más características del Z80 original.
 
