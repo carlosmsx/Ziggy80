@@ -75,7 +75,8 @@ void PIO_OutZ80(register uint16_t port, register uint8_t data)
     pio_sm_put(pio0, sm_z80sequencer, outSeq);
     pio_sm_put(pio0, sm_z80pico, z);
     pio_sm_get_blocking(pio0, sm_z80pico); //descarto resultado
-    sleep_us(1);
+    // pio_sm_get(pio0, sm_z80pico); //descarto resultado
+    //sleep_us(1);
 }
 
 uint8_t PIO_InZ80(register uint16_t port)
@@ -91,6 +92,7 @@ void PIO_WrZ80(register uint16_t port, register uint8_t data)
     pio_sm_put(pio0, sm_z80sequencer, wrSeq);
     pio_sm_put(pio0, sm_z80pico, z);
     pio_sm_get_blocking(pio0, sm_z80pico); //descarto resultado
+    // pio_sm_get(pio0, sm_z80pico); //descarto resultado
 }
 
 uint8_t PIO_RdZ80(register uint16_t address)

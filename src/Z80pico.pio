@@ -86,18 +86,18 @@ static inline void z80pico_program_init(PIO pio, uint sm, uint offset, uint pin)
 .define CLK1 1
 .define CLK0 0
 .wrap_target
-		mov osr,!null
-		out pins,5 							; set all signals to 1
+		set pins, 0x1f					 ; set all signals to 1
 		pull block
-		wait 1 irq 0				;[SHIFT] ; estoy en T1
-		wait CLK0 gpio CPUCLK		;[SHIFT]	; espero T1'
-		out	pins,5					[15]
-		out	pins,5					[15]
-		out	pins,5					[15]
+		wait 1 irq 0					 ; estoy en T1
+		wait CLK0 gpio CPUCLK			 ; espero T1'
+		out	pins,5					[31] ; T1'
+		out	pins,5					[31] ; T2
+		out	pins,5					[31] ; T2'
 		nop							[31] ; wait state
-		out	pins,5					     ; doy un tiempo antes de hacer el IN en sm0
-		irq set 1					[16]
-		out pins,5					[16]
+		nop							[31] ; wait state
+		out	pins,5					     ; T3, doy un tiempo antes de hacer el IN en sm0
+		irq set 1					[31] ; disparo T3 en sm0 
+		out pins,5					[31] ; T3'
 .wrap
 
 % c-sdk {
@@ -108,6 +108,7 @@ static inline void z80sequencer_program_init(PIO pio, uint sm, uint offset, uint
     pio_sm_config conf2 = z80sequencer_program_get_default_config(offset);
 
     sm_config_set_out_pins(&conf2, pin, 5); 		//out
+    sm_config_set_set_pins(&conf2, pin, 5); 		//out
 
     // Set this pin's GPIO function (connect PIO to the pad)
     for (int i=0; i<5; i++) 

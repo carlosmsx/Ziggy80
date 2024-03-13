@@ -5,7 +5,7 @@
  *********************************************/
 
 #pragma once
-#include "pico/stdlib.h"
+//#include "pico/stdlib.h"
 
 #define CHARSET_ROM 7103
 

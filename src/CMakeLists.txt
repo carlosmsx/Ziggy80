@@ -24,7 +24,7 @@ add_compile_options(-Wall
         -Wno-maybe-uninitialized
         )
 
-
+add_definitions(-DFAST_RDOP)
 
 ####
 cmake_minimum_required(VERSION 3.15)
@@ -45,15 +45,15 @@ target_link_libraries(Ziggy80 PRIVATE
 
 pico_add_extra_outputs(Ziggy80)
 
-add_executable(Test)
-pico_generate_pio_header(Test ${CMAKE_CURRENT_LIST_DIR}/z80pico.pio)
+# add_executable(Test)
+# pico_generate_pio_header(Test ${CMAKE_CURRENT_LIST_DIR}/z80pico.pio)
 
-target_sources(Test PRIVATE z80pico.c msx.c test.c marat/Z80.c)
+# target_sources(Test PRIVATE z80pico.c msx.c test.c marat/Z80.c)
 
-target_link_libraries(Test PRIVATE
-        pico_stdlib
-        hardware_pio
-        pico_cyw43_arch_none
-        )
+# target_link_libraries(Test PRIVATE
+#         pico_stdlib
+#         hardware_pio
+#         pico_cyw43_arch_none
+#         )
 
-pico_add_extra_outputs(Test)
+# pico_add_extra_outputs(Test)

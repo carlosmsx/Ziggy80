@@ -26,6 +26,9 @@ bool vdp_int_callback(struct repeating_timer *t)
 int main() 
 {
     // stdio_init_all();
+    set_sys_clock_khz(250000, false);
+
+
     if (cyw43_arch_init()) {
         printf("Wi-Fi init failed");
         return -1;
