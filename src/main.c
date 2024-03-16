@@ -36,7 +36,9 @@ int main()
 
     InitRAM();
     SetupPIO();
-  
+    gpio_init(18);
+    gpio_set_dir(18, false); //lee tecla
+    gpio_pull_up(18);
     InitPPI();
     sleep_ms(200);
     // Ti99Splash();
@@ -52,7 +54,7 @@ int main()
     //Reset the CPU to 0x00 and zero the regs/flags
     ResetZ80(&cpu);
     struct repeating_timer timer;
-    add_repeating_timer_ms(-25, vdp_int_callback, NULL, &timer);
+    add_repeating_timer_ms(-25, vdp_int_callback, NULL, &timer); //60hz
 
     for (;;)
     {
