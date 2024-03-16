@@ -12,30 +12,44 @@
 #include "marat/Z80.h"
 #include "pico/cyw43_arch.h"
 
+extern const uint8_t pacman[];
+void VRAM_write(uint16_t addr, uint8_t value);
+void Test_PSG_1();
+
 //Memoria ram
 uint8_t *RAM;
 
 //Selector de slot
 uint8_t PPI_A8 = 0;
+uint8_t PPI_AA = 0;
 
-uint8_t InZ80(register uint16_t port)
+inline uint8_t InZ80(register uint16_t port)
 {
-    return PIO_InZ80(port);
+    uint8_t data = PIO_InZ80(port);
+    if ((port & 0xff) == 0xa9)
+    {
+        if (((PPI_AA & 0xf) == 2) && !gpio_get(18)) // si el scanline es 2 y se pulsa el boton conectado a gpio18
+            data &= 0b10111111; // genero una pulsacion de la tecla A
+    }
+    return data; 
 }
 
-void OutZ80(register uint16_t port, register uint8_t data)
+inline void OutZ80(register uint16_t port, register uint8_t data)
 {
-    if (port==0)
+    switch(port & 0xff)
     {
+        case 0x00:
         cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, data);
+            return; //sale
+        case 0xa8:
+            PPI_A8 = data; //guardo el registro para saber qué slots/páginas están seleccionadas
+            break;
+        case 0xaa: 
+            PPI_AA = data; //guardo el registro para recuperar el scanline 
+            break;
     }
-    else
-    {
-        if ((port & 0xff) == 0xa8) 
-            PPI_A8 = data;
         PIO_OutZ80(port, data);
     }
-}
 
 inline uint8_t GetSlot(register uint8_t page)
 {
@@ -71,6 +85,7 @@ uint8_t RdZ80(register uint16_t address)
             break;
         case 2: //CARTRIDGE SLOT
             // data = RdMem(address);
+            if (page==1) data = pacman[address & 0x3fff];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);
@@ -89,13 +104,13 @@ uint8_t OpZ80(register uint16_t address)
     {
         case 0: //ROM
             // if (page<2) data = ROM[address]; //pages 0 1
-            if (page<2) data = PIO_RdZ80(address);
-            // data = RdMem(address);
+            data = PIO_RdZ80(address);
             break; 
         case 1: //RAM
             data = RAM[address]; //all pages
             break;
         case 2: //CARTRIDGE SLOT
+            if (page==1) data = pacman[address & 0x3fff];
             // data = RdMem(address);
             break; 
         case 3: //EXPANSION BUS

@@ -35,7 +35,7 @@ cmake_policy(SET CMP0115 NEW)
 add_executable(Ziggy80)
 pico_generate_pio_header(Ziggy80 ${CMAKE_CURRENT_LIST_DIR}/z80pico.pio)
 
-target_sources(Ziggy80 PRIVATE z80pico.c msx.c main.c marat/Z80.c)
+target_sources(Ziggy80 PRIVATE z80pico.c msx.c main.c marat/Z80.c ../pacman.c)
 
 target_link_libraries(Ziggy80 PRIVATE
         pico_stdlib
