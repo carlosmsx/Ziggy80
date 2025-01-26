@@ -9,11 +9,16 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 #include "msx.h"
-#include "marat/Z80.h"
 #include "z80pico.h"
 
-// create a CPU core object
-Z80 cpu;
+#define CHIPS_IMPL
+#include "chips/z80.h"
+#include "chips/ay38910.h"
+#define _CPC_FREQUENCY (4000000)
+
+//// create a CPU core object
+z80_t cpu;
+uint64_t pins;
 
 volatile bool vdp_int=false;
 
@@ -39,8 +44,9 @@ int main()
     gpio_init(18);
     gpio_set_dir(18, false); //lee tecla
     gpio_pull_up(18);
-    InitPPI();
+    // InitPPI();
     sleep_ms(200);
+
     // Ti99Splash();
     // Test_PSG_1();
     // sleep_ms(1000);
@@ -51,19 +57,37 @@ int main()
     //     sleep_ms(250);
     // }
   
-    //Reset the CPU to 0x00 and zero the regs/flags
-    ResetZ80(&cpu);
+    // initialize Z80 emu and execute some clock cycles
+    pins = z80_init(&cpu);
     struct repeating_timer timer;
     add_repeating_timer_ms(-25, vdp_int_callback, NULL, &timer); //60hz
 
     for (;;)
     {
         // execute single opcode from memory at the current PC
-        StepZ80(&cpu);
-        if (vdp_int)
-        {
-            IntZ80(&cpu, INT_RST38);
-            vdp_int = false;
+        pins = z80_tick(&cpu, pins);
+        // if (cpu.step > 2) {
+        //     if ((pins & Z80_INT)) {
+        //         pins &= ~Z80_INT;
+        //     }
+        // }
+
+        // handle memory read or write access
+        if (pins & Z80_MREQ) {
+            if (pins & Z80_RD) {
+                Z80_SET_DATA(pins, RdZ80(Z80_GET_ADDR(pins)));
+            } else if (pins & Z80_WR) {
+                WrZ80(Z80_GET_ADDR(pins), Z80_GET_DATA(pins));
+            }
+        }
+        else if ((pins & Z80_IORQ) & ~(pins & Z80_M1)) {
+            if (pins & Z80_RD) {
+                Z80_SET_DATA(pins, InZ80(Z80_GET_ADDR(pins)));
+            } else if (pins & Z80_WR) {
+                OutZ80(Z80_GET_ADDR(pins), Z80_GET_DATA(pins));
+                if ((Z80_GET_ADDR(pins)&0xff) == 0x98)
+                    return 1;
+            }
         }
     }
 }
