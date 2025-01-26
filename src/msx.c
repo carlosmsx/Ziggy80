@@ -85,7 +85,7 @@ uint8_t RdZ80(register uint16_t address)
             break;
         case 2: //CARTRIDGE SLOT
             // data = RdMem(address);
-            if (page==1) data = pacman[address & 0x3fff];
+            // if (page==1) data = pacman[address & 0x3fff];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);
@@ -110,8 +110,8 @@ uint8_t OpZ80(register uint16_t address)
             data = RAM[address]; //all pages
             break;
         case 2: //CARTRIDGE SLOT
-            if (page==1) data = pacman[address & 0x3fff];
             // data = RdMem(address);
+            // if (page==1) data = pacman[address & 0x3fff];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);
