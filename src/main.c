@@ -20,13 +20,13 @@
 z80_t cpu;
 uint64_t pins;
 
-volatile bool vdp_int=false;
+// volatile bool vdp_int=false;
 
-bool vdp_int_callback(struct repeating_timer *t) 
-{
-    vdp_int = true;
-    return true;
-}
+// bool vdp_int_callback(struct repeating_timer *t) 
+// {
+//     vdp_int = true;
+//     return true;
+// }
 
 int main() 
 {
@@ -60,7 +60,7 @@ int main()
     // initialize Z80 emu and execute some clock cycles
     pins = z80_init(&cpu);
     struct repeating_timer timer;
-    add_repeating_timer_ms(-25, vdp_int_callback, NULL, &timer); //60hz
+    // add_repeating_timer_ms(-25, vdp_int_callback, NULL, &timer); //60hz
 
     for (;;)
     {
@@ -85,8 +85,8 @@ int main()
                 Z80_SET_DATA(pins, InZ80(Z80_GET_ADDR(pins)));
             } else if (pins & Z80_WR) {
                 OutZ80(Z80_GET_ADDR(pins), Z80_GET_DATA(pins));
-                if ((Z80_GET_ADDR(pins)&0xff) == 0x98)
-                    return 1;
+                // if ((Z80_GET_ADDR(pins)&0xff) == 0x98)
+                //     return 1;
             }
         }
     }
