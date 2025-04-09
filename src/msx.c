@@ -22,24 +22,37 @@ uint8_t *RAM;
 //Selector de slot
 uint8_t PPI_A8 = 0;
 uint8_t PPI_AA = 0;
+// uint8_t VDP_99 = 0;
+// uint8_t VDP_data = 0;
+// uint8_t VDP_reg[8] = {0,0b00100000,0,0,0,0,0,0};
+// bool int_st=false;
+// bool int_en=false;
 
-inline uint8_t InZ80(register uint16_t port)
+inline uint8_t __not_in_flash_func(InZ80)(register uint16_t port)
 {
     uint8_t data = PIO_InZ80(port);
-    if ((port & 0xff) == 0xa9)
+    switch (port & 0xff)
     {
-        if (((PPI_AA & 0xf) == 2) && !gpio_get(18)) // si el scanline es 2 y se pulsa el boton conectado a gpio18
-            data &= 0b10111111; // genero una pulsacion de la tecla A
+        // case 0x99:
+        //     //se lee registro de estado del VDP -> reseteo flag INT
+        //     int_st = false;
+        //     VDP_99 = 0;
+        //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN,0);
+        //     break;
+        case 0xa9:
+            if (((PPI_AA & 0xf) == 2) && !gpio_get(18)) // si el scanline es 2 y se pulsa el boton conectado a gpio18
+                data &= 0b10111111; // genero una pulsacion de la tecla A
+            break;
     }
     return data; 
 }
 
-inline void OutZ80(register uint16_t port, register uint8_t data)
+inline void __not_in_flash_func(OutZ80)(register uint16_t port, register uint8_t data)
 {
     switch(port & 0xff)
     {
-        case 0x00:
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, data);
+        case 0x00: //captura de OUT 0,data
+            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, data);
             return; //sale
         case 0xa8:
             PPI_A8 = data; //guardo el registro para saber qué slots/páginas están seleccionadas
@@ -47,11 +60,25 @@ inline void OutZ80(register uint16_t port, register uint8_t data)
         case 0xaa: 
             PPI_AA = data; //guardo el registro para recuperar el scanline 
             break;
+        // case 0x99:
+        //     if (VDP_99==0)
+        //     {
+        //         VDP_data = data;
+        //         VDP_99=1;
+        //     }
+        //     else if (VDP_99==1)
+        //     {
+        //         if (data & 128) //escribe registro
+        //             VDP_reg[data & 0x7] = VDP_data; //guardo el registro del VDP
+        //         int_en = VDP_reg[1] & 0b00100000;
+        //         VDP_99=0;
+        //     }
+        //     break;
     }
-        PIO_OutZ80(port, data);
-    }
+    PIO_OutZ80(port, data);
+}
 
-inline uint8_t GetSlot(register uint8_t page)
+inline uint8_t __not_in_flash_func(GetSlot)(register uint8_t page)
 {
     switch (page)
     {
@@ -68,7 +95,7 @@ inline uint8_t GetSlot(register uint8_t page)
 }
 
 // Memory read -- read the value at memory location 'address'
-uint8_t RdZ80(register uint16_t address)
+uint8_t __not_in_flash_func(RdZ80)(register uint16_t address)
 {
     uint8_t data = 0xff;
     uint8_t page = (address >> 14) & 0x03;
@@ -78,14 +105,13 @@ uint8_t RdZ80(register uint16_t address)
         case 0: //ROM
             // if (page<2) data = ROM[address]; //pages 0 1
             if (page<2) data = PIO_RdZ80(address);
-            // data = RdMem(address);
             break; 
         case 1: //RAM
             data = RAM[address]; //all pages
             break;
         case 2: //CARTRIDGE SLOT
             // data = RdMem(address);
-            // if (page==1) data = pacman[address & 0x3fff];
+            if (page==1) data = pacman[address & 0x3fff];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);
@@ -95,7 +121,7 @@ uint8_t RdZ80(register uint16_t address)
 }
 
 // Opcode read -- read the opcode at memory location 'address'
-uint8_t OpZ80(register uint16_t address)
+uint8_t __not_in_flash_func(OpZ80)(register uint16_t address)
 {
     uint8_t data = 0xff;
     uint8_t page = (address >> 14) & 0x03;
@@ -111,7 +137,7 @@ uint8_t OpZ80(register uint16_t address)
             break;
         case 2: //CARTRIDGE SLOT
             // data = RdMem(address);
-            // if (page==1) data = pacman[address & 0x3fff];
+            if (page==1) data = pacman[address & 0x3fff];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);
@@ -121,7 +147,7 @@ uint8_t OpZ80(register uint16_t address)
 }
 
 // Memory write -- write the 'data' value to memory location 'address'
-void WrZ80(register uint16_t address, register uint8_t data)
+void __not_in_flash_func(WrZ80)(register uint16_t address, register uint8_t data)
 {
     uint8_t page = (address >> 14) & 0x03;
     uint8_t slot = GetSlot(page);

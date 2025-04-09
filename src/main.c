@@ -12,20 +12,15 @@
 #include "marat/Z80.h"
 #include "z80pico.h"
 
+#define TECLA_PIN 18
+#define VDP_INT_PIN 19
+
 // create a CPU core object
 Z80 cpu;
 
-volatile bool vdp_int=false;
-
-bool vdp_int_callback(struct repeating_timer *t) 
-{
-    vdp_int = true;
-    return true;
-}
-
 int main() 
 {
-    // stdio_init_all();
+    stdio_init_all();
     set_sys_clock_khz(250000, false);
 
 
@@ -36,34 +31,28 @@ int main()
 
     InitRAM();
     SetupPIO();
-    gpio_init(18);
-    gpio_set_dir(18, false); //lee tecla
-    gpio_pull_up(18);
+    gpio_init(TECLA_PIN);
+    gpio_set_dir(TECLA_PIN, GPIO_IN); //lee tecla
+    gpio_pull_up(TECLA_PIN);
+    gpio_init(VDP_INT_PIN);
+    gpio_set_dir(VDP_INT_PIN, GPIO_IN);
+
     InitPPI();
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
     sleep_ms(200);
-    // Ti99Splash();
-    // Test_PSG_1();
-    // sleep_ms(1000);
-    // while (true) {
-    //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-    //     sleep_ms(250);
-    //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
-    //     sleep_ms(250);
-    // }
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
   
     //Reset the CPU to 0x00 and zero the regs/flags
     ResetZ80(&cpu);
-    struct repeating_timer timer;
-    add_repeating_timer_ms(-25, vdp_int_callback, NULL, &timer); //60hz
-
+    // static struct repeating_timer timer;
+    // add_repeating_timer_ms(-30, vdp_int_callback, NULL, &timer); //-20=50hs, -16=60hz
     for (;;)
     {
         // execute single opcode from memory at the current PC
         StepZ80(&cpu);
-        if (vdp_int)
+        if (gpio_get(VDP_INT_PIN) == 0)
         {
             IntZ80(&cpu, INT_RST38);
-            vdp_int = false;
         }
     }
 }

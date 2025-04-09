@@ -69,7 +69,7 @@ const uint32_t rdT3  = 0b00101; // MREQ RD OE
 const uint32_t rdT3_ = 0b00101; // MREQ RD OE
 const uint32_t rdSeq = rdT1_ | (rdT2 << 5) | (rdT2_ << 10) | (rdT3 << 15) | (rdT3_ << 20);
 
-void PIO_OutZ80(register uint16_t port, register uint8_t data)
+void __not_in_flash_func(PIO_OutZ80)(register uint16_t port, register uint8_t data)
 {
     uint32_t z = (0xff << 24) | (data << 16) | port;
     pio_sm_put(pio0, sm_z80sequencer, outSeq);
@@ -78,14 +78,14 @@ void PIO_OutZ80(register uint16_t port, register uint8_t data)
     //sleep_us(1);
 }
 
-uint8_t PIO_InZ80(register uint16_t port)
+uint8_t __not_in_flash_func(PIO_InZ80)(register uint16_t port)
 {
     pio_sm_put(pio0, sm_z80sequencer, inSeq);
     pio_sm_put(pio0, sm_z80pico, port);
     return pio_sm_get_blocking(pio0, sm_z80pico); 
 }
 
-void PIO_WrZ80(register uint16_t port, register uint8_t data)
+void __not_in_flash_func(PIO_WrZ80)(register uint16_t port, register uint8_t data)
 {
     uint32_t z = (0xff << 24) | (data << 16) | port;
     pio_sm_put(pio0, sm_z80sequencer, wrSeq);
@@ -93,7 +93,7 @@ void PIO_WrZ80(register uint16_t port, register uint8_t data)
     pio_sm_get_blocking(pio0, sm_z80pico); //descarto resultado
 }
 
-uint8_t PIO_RdZ80(register uint16_t address)
+uint8_t __not_in_flash_func(PIO_RdZ80)(register uint16_t address)
 {
     pio_sm_put(pio0, sm_z80sequencer, rdSeq);
     pio_sm_put(pio0, sm_z80pico, address);
@@ -101,11 +101,11 @@ uint8_t PIO_RdZ80(register uint16_t address)
     return b;
 }
 
-void PIO_Test(register uint16_t port, register uint8_t data)
-{
-    uint32_t z = (data << 16) | port;
-    pio_sm_put(pio0, sm_test, z);
-}
+// void PIO_Test(register uint16_t port, register uint8_t data)
+// {
+//     uint32_t z = (data << 16) | port;
+//     pio_sm_put(pio0, sm_test, z);
+// }
 
 void SetupPIO() {
     sm_z80pico = pio_claim_unused_sm(pio0, true);
@@ -117,8 +117,10 @@ void SetupPIO() {
     z80sequencer_program_init(pio0, sm_z80sequencer, offset_z80sequencer, 12);
 }
 
+/*
 void SetupPIOTest() {
     sm_test = pio_claim_unused_sm(pio0, true);
     offset_test = pio_add_program(pio0, &test_program);
     test_program_init(pio0, sm_test, offset_test, 2);
 }
+*/

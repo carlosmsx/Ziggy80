@@ -16,6 +16,7 @@
 #include "Z80.h"
 #include "Tables.h"
 #include <stdio.h>
+#include "pico/stdlib.h"
 
 /** INLINE ***************************************************/
 /** C99 standard has "inline", but older compilers used     **/
@@ -553,7 +554,7 @@ int ExecZ80(register Z80 *R,register int RunCycles)
 /** IntZ80() *************************************************/
 /** This function will generate interrupt of given vector.  **/
 /*************************************************************/
-void IntZ80(Z80 *R,zword Vector)
+void __not_in_flash_func(IntZ80)(Z80 *R,zword Vector)
 {
   /* If HALTed, take CPU off HALT instruction */
   if(R->IFF&IFF_HALT) { R->PC.W++;R->IFF&=~IFF_HALT; }
@@ -688,7 +689,7 @@ zword RunZ80(Z80 *R)
 /** It will return the current register values in R.        **/
 /*************************************************************/
 #ifdef STEPZ80
-void StepZ80(register Z80 *R)
+void __not_in_flash_func(StepZ80)(register Z80 *R)
 {
   register byte I;
   register pair J;

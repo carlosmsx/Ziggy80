@@ -12,6 +12,7 @@
 /*************************************************************/
 #ifndef Z80_H
 #define Z80_H
+#include "pico/stdlib.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -143,6 +144,7 @@ void StepZ80(register Z80 *R);
 /************************************ TO BE WRITTEN BY USER **/
 void WrZ80(register zword Addr,register byte Value);
 byte RdZ80(register zword Addr);
+byte OpZ80(register zword Addr);
 
 /** InZ80()/OutZ80() *****************************************/
 /** Z80 emulation calls these functions to read/write from  **/
