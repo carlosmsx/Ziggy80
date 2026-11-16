@@ -22,7 +22,7 @@
 inicio:
 		mov osr,!null		side NONE
 		out pindirs,8		side NONE	; set data bus as output
-        pull block			side NONE	; espero operacion
+		pull block		side NONE	; espero operacion
 		wait CLK0 gpio CPUCLK	side NONE	; necesario para estabilizar la sincronizacion
 		wait CLK1 gpio CPUCLK	side NONE	; sincronizo T1
 		irq set 0		side NONE	; disparo secuencia
@@ -33,20 +33,19 @@ T1:
 		out pins,8          	side ADDR_H  [2] ; LE durante 2 ciclos
 		wait CLK0 gpio CPUCLK	side NONE    [1] ; termino LE y espero T1'
 ; CODIGO CON 74LS574
-		; out pins,8          	side NONE   ; presento addr_low  
+		; out pins,8          	side NONE	; presento addr_low  
 		; nop			side ADDR_L	; CLK 
-		; out pins,8          	side NONE   ; presento addr_high
+		; out pins,8          	side NONE	; presento addr_high
 		; wait CLK0 gpio CPUCLK	side ADDR_H	; CLK 
 T1_:
-		out	pins,8				side NONE	; data
-		out pindirs 8			side NONE	; set data bus as input/output
-
-		wait 1 irq 1			side NONE	; waits ending of sequence
+		out pins,8		side NONE	; data
+		out pindirs 8		side NONE	; set data bus as input/output
+		wait 1 irq 1		side NONE	; waits ending of sequence
 T3:
-		in pins,32				side NONE	; TODO: is it possible to set threshold for input in order to avoid PUSH?
+		in pins,32		side NONE	; TODO: is it possible to set threshold for input in order to avoid PUSH?
 		wait CLK0 gpio CPUCLK	side NONE	; espero T3'
 T3_:
-		push					side NONE
+		push			side NONE
 .wrap
 
 % c-sdk {
@@ -86,18 +85,18 @@ static inline void z80pico_program_init(PIO pio, uint sm, uint offset, uint pin)
 .define CLK1 1
 .define CLK0 0
 .wrap_target
-		set pins, 0x1f					 ; set all signals to 1
+		set pins, 0x1f				 ; set all signals to 1
 		pull block
-		wait 1 irq 0					 ; estoy en T1
+		wait 1 irq 0				 ; estoy en T1
 		wait CLK0 gpio CPUCLK			 ; espero T1'
-		out	pins,5					[31] ; T1'
-		out	pins,5					[31] ; T2
-		out	pins,5					[31] ; T2'
-		nop							[31] ; wait state
-		nop							[31] ; wait state
-		out	pins,5					     ; T3, doy un tiempo antes de hacer el IN en sm0
-		irq set 1					[31] ; disparo T3 en sm0 
-		out pins,5					[31] ; T3'
+		out pins,5				[31] ; T1'
+		out pins,5				[31] ; T2
+		out pins,5				[31] ; T2'
+		nop					[31] ; wait state
+		nop					[31] ; wait state
+		out pins,5				; T3, doy un tiempo antes de hacer el IN en sm0
+		irq set 1				[31] ; disparo T3 en sm0 
+		out pins,5				[31] ; T3'
 .wrap
 
 % c-sdk {

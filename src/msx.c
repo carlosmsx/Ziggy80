@@ -11,8 +11,15 @@
 #include "msx.h"
 #include "marat/Z80.h"
 #include "pico/cyw43_arch.h"
+#include "embedded_rom.h" //generar archivo con bon2header.py "source.rom" "embedded_rom.h" "embedded_rom"
+#include "dskio.h"
 
-extern const uint8_t pacman[];
+//void processCommand(register uint8_t command);
+//uint8_t dataToSend();
+//void processData(register uint8_t data);
+
+
+//extern const uint8_t pacman[];
 void VRAM_write(uint16_t addr, uint8_t value);
 void Test_PSG_1();
 
@@ -39,6 +46,8 @@ inline uint8_t __not_in_flash_func(InZ80)(register uint16_t port)
         //     VDP_99 = 0;
         //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN,0);
         //     break;
+        case 0x00:
+            return dataToSend();
         case 0xa9:
             if (((PPI_AA & 0xf) == 2) && !gpio_get(18)) // si el scanline es 2 y se pulsa el boton conectado a gpio18
                 data &= 0b10111111; // genero una pulsacion de la tecla A
@@ -51,8 +60,14 @@ inline void __not_in_flash_func(OutZ80)(register uint16_t port, register uint8_t
 {
     switch(port & 0xff)
     {
+        // case 0x00: //captura de OUT 0,data
+        //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, data);
+        //     return; //sale
         case 0x00: //captura de OUT 0,data
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, data);
+            processData(data);
+            return; //sale
+        case 0x01: //captura de OUT 1,command
+            processCommand(data);
             return; //sale
         case 0xa8:
             PPI_A8 = data; //guardo el registro para saber qué slots/páginas están seleccionadas
@@ -107,11 +122,13 @@ uint8_t __not_in_flash_func(RdZ80)(register uint16_t address)
             if (page<2) data = PIO_RdZ80(address);
             break; 
         case 1: //RAM
+            PIO_RdZ80(address);
             data = RAM[address]; //all pages
             break;
         case 2: //CARTRIDGE SLOT
             // data = RdMem(address);
-            if (page==1) data = pacman[address & 0x3fff];
+            if (page==1) data = embedded_rom[address & 0x3fff];
+            // if (page==1 || page==2) data = galaga_rom[address - 0x4000];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);
@@ -133,11 +150,13 @@ uint8_t __not_in_flash_func(OpZ80)(register uint16_t address)
             data = PIO_RdZ80(address);
             break; 
         case 1: //RAM
+            PIO_RdZ80(address);
             data = RAM[address]; //all pages
             break;
         case 2: //CARTRIDGE SLOT
             // data = RdMem(address);
-            if (page==1) data = pacman[address & 0x3fff];
+            if (page==1) data = embedded_rom[address & 0x3fff];
+            // if (page==1 || page==2) data = galaga_rom[address - 0x4000];
             break; 
         case 3: //EXPANSION BUS
             // data = RdMem(address);

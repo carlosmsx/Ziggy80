@@ -1,2 +1,12 @@
 .vscode/
 build/
+
+# imagenes de juegos/discos y headers generados con py/bin2header.py
+*.dsk
+*.DSK
+*.rom
+*.zip
+*.rar
+src/embedded_dsk.h
+src/embedded_rom.h
+src/galaga.h
